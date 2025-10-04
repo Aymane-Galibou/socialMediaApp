@@ -4,15 +4,19 @@ import { commentRouter } from "./modules/comments/comment.controller.js";
 import { postRouter } from "./modules/posts/post.controller.js";
 import { userRouter } from "./modules/users/user.controller.js";
 import { globalErrorHandel } from "./utils/globalErrorHandling/index.js";
+import { createHandler } from 'graphql-http/lib/use/express';
+import {graphSchema} from "./modules/graphql.schema.js"
 
 export const bootstrap = (app, express) => {
+
   // this middleware to handle DDOS/DOS
   app.use(
     rateLimit({
-      limit: 5,
+      limit: 15,
       legacyHeaders: false,
     })
   );
+
   // connection to our database
   connectionDB();
 
@@ -25,8 +29,12 @@ export const bootstrap = (app, express) => {
 
   // handling Routes
   app.use("/users", userRouter);
+
   app.use("/posts", postRouter);
+
   app.use("/comments", commentRouter);
+
+  app.use("/graphql/posts",createHandler({schema:graphSchema} ))
 
   app.use((req, res, next) => {
     return next(new Error("This Endpoint Is Not Defined"));

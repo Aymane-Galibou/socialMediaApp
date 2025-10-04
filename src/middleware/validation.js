@@ -20,3 +20,15 @@ export const validation = (schema) => {
     next();
   };
 };
+
+
+
+export const validationGraphQL = async({schema,body}) => {
+
+    const { error } = schema.validate(body, { abortEarly: false });
+    if (error) {
+       throw new appError(error.message,400)
+    }
+    return {}
+  
+};
