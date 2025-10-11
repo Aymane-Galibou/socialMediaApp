@@ -85,8 +85,8 @@ const userSchema = new Schema(
         },
         time:[Date]
       }
-    ]
-
+    ],
+  friends:[{type:mongoose.Schema.Types.ObjectId,ref:"users"}]
   },
   {
     timestamps: true,

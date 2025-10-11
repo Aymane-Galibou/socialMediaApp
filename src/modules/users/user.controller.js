@@ -27,10 +27,16 @@ userRouter.put("/forgetPassword",US.forgetPassword)
 userRouter.patch("/resetPassword",validation(US.resetPasswordSchema),US.resetPassword)
 
 // show profile
-userRouter.get("/profile/:id",authenticate,US.showProfile)
+userRouter.get("/profile/shareProfile/:id",authenticate,US.showProfile)
+
+// get Profile
+userRouter.get("/profile/getProfile",authenticate,US.getProfile)
 
 //update Profile information
 userRouter.patch("/profile/update",multerCloudinary(fileTypes.image).single("image"),validation(US.updateProfileSchema),authenticate,US.updateProfile);
+
+//update Profile information
+userRouter.patch("/profile/addFriend/:friendId",authenticate,US.addFriend);
 
 // update password 
 userRouter.put("/profile/updatePassword",validation(US.updatePasswordSchema),authenticate,US.updatePassword)

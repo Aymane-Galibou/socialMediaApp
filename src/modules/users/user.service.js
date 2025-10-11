@@ -69,7 +69,7 @@ export const confirmEmail=asyncHandler(async (req,res,next)=>{
     return res.status(200).send({statusMessage:"User Confirmed Successfuly",newUser})
 
 })
-
+ 
 // START function that handles signin
 export const login=asyncHandler( async(req,res,next)=>{ 
     const {email,password}=req.body
@@ -104,7 +104,7 @@ export const login=asyncHandler( async(req,res,next)=>{
         refreshToken,
       });
 
-})
+}) 
 
 // START function that refresh Token
 export const tokenRefresher=asyncHandler( async(req,res,next)=>{ 
@@ -169,7 +169,7 @@ sendEmailEvent.emit("forgotPassword",{email})
         StatusMessage: "Check your Email,we sent to you a verification code",
       });
 
-})
+}) 
 
 // START function that handles reseting password
 export const resetPassword = asyncHandler(async (req, res, next) => {
@@ -250,6 +250,23 @@ const newUser=await userModel.findByIdAndUpdate(req.user._id,{...updateData,imag
   return res.status(200).send({
     message: "Profile Update Successfuly",
     user: newUser,
+  });
+});
+
+// START function that handles profile update
+export const addFriend = asyncHandler(async (req, res,next) => {
+  const {friendId}=req.params
+
+const newUser=await userModel.findOneAndUpdate({_id:friendId,isDeleted:false},{$addToSet:{friends:req.user._id}},{new:true})
+  if (!newUser) {
+    return next(
+      new Error("Unable to add this Friend. Please verify is that friend exist or not")
+    );
+  }
+  await userModel.findOneAndUpdate({_id:req.user._id,isDeleted:false},{$addToSet:{friends:friendId}},{new:true})
+  return res.status(200).send({
+    message: "You add it To your Friends",
+    user: req.user,
   });
 });
 
@@ -338,6 +355,24 @@ return res.status(200).send({
 
 })
 
+// START function that shows profile
+export const getProfile=asyncHandler(async (req,res,next)=>{
+  
+  const user=await userModel.findOne({_id:req.user._id},{email:0,password:0,passwordChangedAt:0}).populate([{path:"friends"}])
+  if (!user) {
+    return next(
+      new Error("This Profile is not exist",{cause:404})
+    );
+  }
+
+
+return res.status(200).send({
+    message: "Profile Fetched Successfuly",
+    userInformation:user,
+  });
+
+})
+
 // START function that handles updating email
 export const updateEmail = asyncHandler(async (req, res, next) => {
   const { newEmail, oldEmail } = req.body;
@@ -413,7 +448,6 @@ export const getDashboard=asyncHandler(async(req,res,next)=>{
   const [posts,users]=await Promise.all([postModel.find().lean(),userModel.find().select("name email gender role image passwordChangedAt")]) 
   return res.status(200).send({success:true,message:"Welcome to Dahboard , everything is fetched successfuly",posts,users})
 })
-
 
 // update role 
 export const updateRole=asyncHandler(async(req,res,next)=>{
